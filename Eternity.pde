@@ -29,21 +29,30 @@ int SCENE_LOADING = 1,
     SCENE_GAME = 3,
     SCENE_GAMEOVER = 4;
 
+// Font declarations
+PFont display;
+PFont text;
+
 void setup() {
   
   // Set window size
   surface.setSize(window_width, window_height);
   // size(screenWidth, screenHeight);
   
+  // Load fonts
+  String fontpath = "fonts/";
+  display = createFont(fontpath + "Crumbled-Pixels.ttf", 72);
+  text = createFont(fontpath + "BitPotion.ttf", 72);
+  
   // Set draw conditions
   imageMode(CENTER);
   
   // Load Images
-  String path = "graphics/environment/";
-  background = loadImage(path + "Background_Largest.png");
+  String imagepath = "graphics/environment/";
+  background = loadImage(imagepath + "Background_Largest.png");
   
-  path = "graphics/sprites/player/";
-  PImage[] crane_images = {loadImage(path + "Crane_IdleAnim_1.png"), loadImage(path + "Crane_IdleAnim_2.png"), loadImage(path + "Crane_Walkcycle_1.png"), loadImage(path + "Crane_Walkcycle_2.png"), loadImage(path + "Crane_Walkcycle_3.png"), loadImage(path + "Crane_Walkcycle_4.png"), loadImage(path + "Crane_Walkcycle_5.png"), loadImage(path + "Crane_Walkcycle_6.png"), loadImage(path + "Crane_Walkcycle_7.png"), loadImage(path + "Crane_Walkcycle_8.png"), loadImage(path + "Crane_JumpAnim_Up.png"), loadImage(path + "Crane_JumpAnim_Down.png")};
+  imagepath = "graphics/sprites/player/";
+  PImage[] crane_images = {loadImage(imagepath + "Crane_IdleAnim_1.png"), loadImage(imagepath + "Crane_IdleAnim_2.png"), loadImage(imagepath + "Crane_Walkcycle_1.png"), loadImage(imagepath + "Crane_Walkcycle_2.png"), loadImage(imagepath + "Crane_Walkcycle_3.png"), loadImage(imagepath + "Crane_Walkcycle_4.png"), loadImage(imagepath + "Crane_Walkcycle_5.png"), loadImage(imagepath + "Crane_Walkcycle_6.png"), loadImage(imagepath + "Crane_Walkcycle_7.png"), loadImage(imagepath + "Crane_Walkcycle_8.png"), loadImage(imagepath + "Crane_JumpAnim_Up.png"), loadImage(imagepath + "Crane_JumpAnim_Down.png")};
   // Idle, Walking, Jump
   int[][] crane_sequences = {{0, 1}, {2, 3, 4, 5, 6, 7, 8, 9}, {10, 11}};
   // Create the player
@@ -110,14 +119,15 @@ class Environment {
 
 void drawScene(int scene) {
   
-  PImage crane_idle_1;
-  
   // Startup
   if (scene == SCENE_LOADING) {
     // Pink background
     color backdrop = color(245, 175, 185);
     background(backdrop);
-    player.drawSprite(player.images[player.animate_sequences[1][player.calcAnimationFrame(2, 5) - 1]], width/2, height/2);
+    player.drawSprite(player.images[player.animate_sequences[1][player.calcAnimationFrame(2, 5) - 1]], width/2, height/2 - 25);
+    textFont(display, 60);
+    textAlign(CENTER);
+    text("Loading...", width/2, height/2 + 125);
   } 
   
   // Main screen/Start screen
