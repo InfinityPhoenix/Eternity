@@ -1,26 +1,31 @@
-///////////////////////////////////////////////
-//                                           //
-//                Eternity                   //
-//                                           //
-//      Credits:                             //
-//      Design - Cindy Xiong                 //
-//      Storyline - Janet Liu                //
-//      Art/Graphics - Cindy Xiong           //
-//      Music/Sound - Kevin Yang             //
-//      Coding - Victor Qiu, Kevin Yang      //
-//                                           //
-//      Made with Processing 3.4, 2018       //
-//                                           //
-///////////////////////////////////////////////
+//////////////////////////////////////////////////
+//                                              //
+//                   Eternity                   //
+//                                              //
+//      Credits:                                //
+//      Design - Janet Liu, Cindy Xiong         //
+//      Storyline - Janet Liu, Cindy Xiong      //
+//      Art/Graphics - Cindy Xiong              //
+//      Music/Sound - Kevin Yang                //
+//      Coding - Justin Im, Victor Qiu,         //
+//      Kevin Yang                              //
+//                                              //
+//      ...with help from:                      //
+//      Coding - Chris Xiong                    //
+//                                              //
+//      Made with Processing 3.4, 2018          //
+//                                              //
+//////////////////////////////////////////////////
 
 //-----Setup-----
 // Application variables
-int window_width = 720;
-int window_height = 480;
+float aspect_ratio = (16.0/9.0);
+float window_height = 500.0;
+float window_width = aspect_ratio * window_height;
 int framerate = 30;
 
 // Animations/Images
-PImage background;
+PImage background_img;
 Sprite player;
 TextAnimation loading;
 
@@ -37,7 +42,7 @@ PFont text;
 void setup() {
   
   // Set window size
-  surface.setSize(window_width, window_height);
+  surface.setSize(int(window_width), int(window_height));
   
   // Load fonts
   String fontpath = "fonts/";
@@ -50,7 +55,7 @@ void setup() {
   // Load Images
   // Background
   String imagepath = "graphics/environment/";
-  background = loadImage(imagepath + "Background_Largest.png");
+  background_img = loadImage(imagepath + "Background_Largest.png");
   
   // Player (Crane)
   imagepath = "graphics/sprites/player/";
@@ -156,9 +161,9 @@ class Sprite extends Animation {
   PImage sprite_frame;
   
   // Draw a frame of a sprite at a specified location
-  void drawSprite(PImage i, int x, int y) {
+  void drawSprite(PImage i, int x, int y, int w, int h) {
     sprite_frame = i;
-    image(sprite_frame, x, y);
+    image(sprite_frame, x, y, w, h);
   }
   
 }
@@ -191,6 +196,41 @@ class Environment {
 
 //-----Functions-----
 
+PImage adjustResolution(PImage i, float a, String al) {
+  
+  PImage image = i;
+  float aspect = a;
+  String alignment = al;
+  
+  if (aspect >= image.width/image.height) {
+    int new_height = int(float(image.width)/aspect);
+    if (alignment == "top") {
+      image = image.get(0, 0, image.width, new_height);
+    } 
+    else if (alignment == "bottom") {
+      image = image.get(0, image.height - new_height, image.width, new_height);
+    }
+    else {
+      image = image.get(0, (image.height - new_height)/2, image.width, new_height);
+    }
+  }
+  else {
+    int new_width = int(float(image.height) * aspect);
+    if (alignment == "left") {
+      image = image.get(0, 0, new_width, image.height);
+    } 
+    else if (alignment == "right") {
+      image = image.get(image.width - new_width, 0, new_width, image.height);
+    }
+    else {
+      image = image.get((image.width - new_width)/2, 0, new_width, image.height);
+    }
+  }
+  
+  return image;
+  
+}
+
 void drawScene(int scene) {
   
   // Startup
@@ -201,12 +241,12 @@ void drawScene(int scene) {
     background(backdrop);
     
     // Draw the walking player on repeat in the same spot
-    player.drawSprite(player.images[player.animate_sequences[1][player.calcAnimationFrame(2, 5) - 1]], width/2, height/2 - 25);
+    player.drawSprite(player.images[player.animate_sequences[1][player.calcAnimationFrame(2, 5) - 1]], width/2, height/2 - int(window_height/18.0), int(window_height/2.5), int(window_height/2.5));
     
     // Display a loading message
-    textFont(display, 60);
+    textFont(display, int(window_height/9.0));
     textAlign(CENTER);
-    loading.drawText(loading.texts[loading.animate_sequences[0][loading.calcAnimationFrame(1, 20) - 1]], width/2, height/2 + 125);
+    loading.drawText(loading.texts[loading.animate_sequences[0][loading.calcAnimationFrame(1, 20) - 1]], width/2, height/2 + int(window_height/4.5));
   
   } 
   
@@ -217,7 +257,7 @@ void drawScene(int scene) {
   
   // Game
   else if (scene == SCENE_GAME) {
-    image(background, width/2, height/2, width, height);
+    image(adjustResolution(background_img, aspect_ratio, "center"), width/2, height/2, width, height);
   }
   // Game Over
   else if (scene == SCENE_GAMEOVER) {
@@ -236,6 +276,7 @@ void drawScene(int scene) {
 void draw() {
   
   frameRate(framerate);
-  drawScene(SCENE_LOADING);
+  //drawScene(SCENE_LOADING);
+  drawScene(SCENE_GAME);
   
 }
