@@ -14,6 +14,7 @@
 //      Coding - Chris Xiong                    //
 //                                              //
 //      Made with Processing 3.4, 2018          //
+//      Last updated: 12/7/2018                 //
 //                                              //
 //////////////////////////////////////////////////
 
@@ -41,8 +42,9 @@ PFont text;
 
 void setup() {
   
-  // Set window size
+  // Set session variables
   surface.setSize(int(window_width), int(window_height));
+  frameRate(framerate);
   
   // Load fonts
   String fontpath = "fonts/";
@@ -59,31 +61,14 @@ void setup() {
   
   // Player (Crane)
   imagepath = "graphics/sprites/player/";
-  PImage[] crane_images = {
-    loadImage(imagepath + "Crane_IdleAnim_1.png"), 
-    loadImage(imagepath + "Crane_IdleAnim_2.png"),
-    loadImage(imagepath + "Crane_Walkcycle_1.png"),
-    loadImage(imagepath + "Crane_Walkcycle_2.png"), 
-    loadImage(imagepath + "Crane_Walkcycle_3.png"), 
-    loadImage(imagepath + "Crane_Walkcycle_4.png"), 
-    loadImage(imagepath + "Crane_Walkcycle_5.png"), 
-    loadImage(imagepath + "Crane_Walkcycle_6.png"), 
-    loadImage(imagepath + "Crane_Walkcycle_7.png"), 
-    loadImage(imagepath + "Crane_Walkcycle_8.png"), 
-    loadImage(imagepath + "Crane_JumpAnim_Up.png"), 
-    loadImage(imagepath + "Crane_JumpAnim_Down.png")
-  };
+  PImage[] crane_spritesheets = {loadImage("graphics/sprites/player/WalkCycle.png")};
   // Idle, Walking, and Jump animations
-  int[][] crane_sequences = {
-    // Idle animation
-    {0, 1}, 
+  int[][] crane_seqs = {
     // Walking animation
-    {2, 3, 4, 5, 6, 7, 8, 9}, 
-    // Jumping animation
-    {10, 11}
+    {3, 8} // 3 per row, 8 total sprites
   };
   // Create the player
-  player = new Sprite(crane_images, crane_sequences);
+  player = new Sprite(crane_spritesheets, crane_seqs, calcAnimationSequence(crane_seqs));
   
   // Loading text
   String[] loading_texts = {
@@ -92,9 +77,7 @@ void setup() {
     "Loading..",
     "Loading..."
   };
-  int[][] loading_sequences = {
-    {0, 1, 2, 3}
-  };
+  int[] loading_sequences = {4};
   loading = new TextAnimation(loading_texts, loading_sequences);
   
 }
@@ -102,83 +85,120 @@ void setup() {
 //-----Classes-----
 // Generic animations, ie: Sprites, Text etc.
 class Animation {
-
-  int[][] animate_sequences;
   
-  Animation(int[][] a) {
+  // Class variables
+  int[] animate_sequences; // Store sequences for animation
+  
+  // Base Animation constructor: Takes a sequence of animations and passes it in 
+  Animation(int[] a) {
     animate_sequences = a;
   }
   
+  // AnimationFrame variables
   int cycle = 1;
   int delay = 1;
   int i = 1;
   
   // Calculate what frame to draw
   int calcAnimationFrame(int seq, int del) {
+    
     delay = del;
-    // Account for 'seq' not being 0-indexed because asking for 'Sequence 0' makes no sense
-    int[] animation_sequence = animate_sequences[seq - 1];
+    
     // If the cycle is equal to or past the last image in the sequence, reset
-    if (cycle >= animation_sequence.length) {
+    if (cycle >= animate_sequences[seq - 1]) {
       if (i < delay) {
         i += 1;
-        return cycle;
+        return cycle - 1;
       }
       else {
         i = 1;
         cycle = 1;
-        return cycle;
+        return cycle - 1;
       }
     }
     else {
       // Iterate 'i' but not 'cycle' to create a 'frozen' frame
       if (i < delay) {
         i += 1;
-        return cycle;
+        return cycle - 1;
       }
       // Iterate 'cycle' but not 'i' to cycle and reset the delay counter
       else {
         i = 1;
         cycle += 1;
-        return cycle;
+        return cycle - 1;
       }
     }
   }
-  
 }
 
-// Definte sprite-specific animations
+// Sprite-specific animations
 class Sprite extends Animation {
   
-  PImage[] images;
+  // Define class variables
+  PImage[][] sprites;
+  PImage[] frames;
   
-  Sprite(PImage[] i, int[][] a) {
+  // Sprite constructor, where sss is an array of spritesheets, sssplit is an array of arrays to split (width and height), and finally animation sequences
+  Sprite(PImage[] sss, int[][] sssplit, int[] a) {
+    
     // Pass 'a' into the Animation constructor
     super(a);
-    images = i;
+    
+    // Set the first dimension to the amount of spritesheets given. The second dimension will be set later as this is a jagged array
+    sprites = new PImage[sss.length][];
+    
+    // Triple-nested for loops to iterate through all spritesheets and animation sequences
+    for(int i = 0; i < sss.length; i++) {
+      
+      int images = 0; // Track images so far
+      int r = ceil(float(sssplit[i][1])/float(sssplit[i][0])); // Calculate rows
+      int w = int(float(sss[i].width)/float(sssplit[i][0])); // Calculate the width of each image
+      int h = int(float(sss[i].height)/float(r)); // Calculate the height of each image 
+      sprites[i] = new PImage[sssplit[i][1]]; // Set the second dimension to the amount of images in the current spritesheet to allow for the creation of a jagged array
+      
+      // Iterate through all rows
+      for (int j = 0; j < r; j++) {
+        // Iterate through all of the columns
+        for (int k = 0; k < sssplit[i][0]; k++) {
+          // Check if all the specified images have already been done, crop out a sprite if not all have been done yet
+          if (images < a[i]) {
+            sprites[i][images] = sss[i].get(k * w, j * h, w, h);
+          }
+          // Exit the loop if done
+          else {
+            j = a[i];
+          }
+          images += 1;
+        }
+      }   
+    }
   }
   
   PImage sprite_frame;
   
   // Draw a frame of a sprite at a specified location
-  void drawSprite(PImage i, int x, int y, int w, int h) {
-    sprite_frame = i;
+  void drawSprite(PImage img, int x, int y, int w, int h) {
+    sprite_frame = img;
     image(sprite_frame, x, y, w, h);
   }
-  
+
 }
 
+// Text-specific animations
 class TextAnimation extends Animation {
   
+  // Define class variables
   String[] texts;
+  String text_frame;
   
-  TextAnimation(String[] t, int[][] a) {
+  // TextAnimation Constructor, take in a string array of all text to be used as well as the animation sequences
+  TextAnimation(String[] t, int[] a) {
     super(a);
     texts = t;
   }
   
-  String text_frame;
-  
+  // Function to draw the text
   void drawText(String t, int x, int y) {
     text_frame = t;
     text(t, x, y);
@@ -186,42 +206,51 @@ class TextAnimation extends Animation {
   
 }
 
+// Player class
 class Crane {
 
 }
 
+// Background class
 class Environment {
 
 }
 
 //-----Functions-----
-
+// Adjust a graphic to fit the resolution
 PImage adjustResolution(PImage i, float a, String al) {
   
-  PImage image = i;
-  float aspect = a;
-  String alignment = al;
+  // Store function variables
+  PImage image = i; // Image to crop
+  float aspect = a; // Aspect ratio to use
+  String alignment = al; // Alignment/cropping instructions
   
   if (aspect >= image.width/image.height) {
     int new_height = int(float(image.width)/aspect);
+    // Take the top section (cuts out from the bottom)
     if (alignment == "top") {
       image = image.get(0, 0, image.width, new_height);
     } 
+    // Take the bottom section (cuts out from the top)
     else if (alignment == "bottom") {
       image = image.get(0, image.height - new_height, image.width, new_height);
     }
+    // Take the middle section (default, cuts from top and bottom)
     else {
       image = image.get(0, (image.height - new_height)/2, image.width, new_height);
     }
   }
   else {
     int new_width = int(float(image.height) * aspect);
+    // Take the left section (cut from the right)
     if (alignment == "left") {
       image = image.get(0, 0, new_width, image.height);
     } 
+    // Take the right section (cut from the left)
     else if (alignment == "right") {
       image = image.get(image.width - new_width, 0, new_width, image.height);
     }
+    // Take the middle section (default, cut from left and right)
     else {
       image = image.get((image.width - new_width)/2, 0, new_width, image.height);
     }
@@ -229,6 +258,16 @@ PImage adjustResolution(PImage i, float a, String al) {
   
   return image;
   
+}
+
+// Takes an array of arrays of 2 values, the amount of rows and the total images and returns the sequences
+int[] calcAnimationSequence(int[][] s) {
+  int[] animation_sequences = {};
+  for (int i = 0; i < s.length; i++) {
+    int sequence = s[i][1]; // Get the amount of images in one sequence
+    animation_sequences = append(animation_sequences, sequence); // Add the result to the array
+  }
+  return animation_sequences; // Return the amount of images in each sequence as an array
 }
 
 void drawScene(int scene) {
@@ -241,12 +280,12 @@ void drawScene(int scene) {
     background(backdrop);
     
     // Draw the walking player on repeat in the same spot
-    player.drawSprite(player.images[player.animate_sequences[1][player.calcAnimationFrame(2, 5) - 1]], width/2, height/2 - int(window_height/18.0), int(window_height/2.5), int(window_height/2.5));
+    player.drawSprite(player.sprites[0][player.calcAnimationFrame(1, 5)], width/2, height/2 - int(window_height/18.0), int(window_height/2.5), int(window_height/2.5));
     
     // Display a loading message
     textFont(display, int(window_height/9.0));
     textAlign(CENTER);
-    loading.drawText(loading.texts[loading.animate_sequences[0][loading.calcAnimationFrame(1, 20) - 1]], width/2, height/2 + int(window_height/4.5));
+    loading.drawText(loading.texts[loading.calcAnimationFrame(1, 20)], width/2, height/2 + int(window_height/4.5));
   
   } 
   
@@ -275,8 +314,8 @@ void drawScene(int scene) {
 
 void draw() {
   
-  frameRate(framerate);
-  //drawScene(SCENE_LOADING);
-  drawScene(SCENE_GAME);
-  
+  frameRate(framerate); // Set framerate
+  drawScene(SCENE_LOADING);
+  //drawScene(SCENE_MAIN);
+
 }
