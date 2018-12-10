@@ -7,14 +7,13 @@
 //      Storyline - Janet Liu, Cindy Xiong      //
 //      Art/Graphics - Cindy Xiong              //
 //      Music/Sound - Kevin Yang                //
-//      Coding - Justin Im, Victor Qiu,         //
-//      Kevin Yang                              //
+//      Coding - Justin Im, Kevin Yang          //
 //                                              //
 //      ...with help from:                      //
 //      Coding - Chris Xiong                    //
 //                                              //
 //      Made with Processing 3.4, 2018          //
-//      Last updated: 12/7/2018                 //
+//      Last updated: 12/10/2018                //
 //                                              //
 //////////////////////////////////////////////////
 
@@ -72,7 +71,6 @@ void setup() {
   
   // Loading text
   String[] loading_texts = {
-    "Loading",
     "Loading.",
     "Loading..",
     "Loading..."
@@ -105,7 +103,7 @@ class Animation {
     delay = del;
     
     // If the cycle is equal to or past the last image in the sequence, reset
-    if (cycle >= animate_sequences[seq - 1]) {
+    if (cycle >= animate_sequences[seq - 1] - 1) {
       if (i < delay) {
         i += 1;
         return cycle - 1;
