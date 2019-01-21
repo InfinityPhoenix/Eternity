@@ -1,28 +1,28 @@
-//////////////////////////////////////////////////
-//                                              //
-//                   Eternity                   //
-//                                              //
-//      Credits:                                //
-//      Design - Janet Liu, Cindy Xiong         //
-//      Storyline - Janet Liu, Cindy Xiong      //
-//      Art/Graphics - Cindy Xiong              //
-//      Music/Sound - Kevin Yang                //
-//      Coding - Justin Im, Kevin Yang          //
-//                                              //
-//      ...with help from:                      //
-//      Coding - Chris Xiong                    //
-//                                              //
-//      Made with Processing 3.4, 2018          //
-//      Last updated: 12/10/2018                //
-//                                              //
-//////////////////////////////////////////////////
+/////////////////////////////////////////////////
+//                                             //
+//                  Eternity                   //
+//                                             //
+//     Credits:                                //
+//     Design - Janet Liu, Cindy Xiong         //
+//     Storyline - Janet Liu, Cindy Xiong      //
+//     Art/Graphics - Cindy Xiong              //
+//     Music/Sound - Kevin Yang                //
+//     Coding - Justin Im, Kevin Yang          //
+//                                             //
+//     ...with help from:                      //
+//     Coding - Chris Xiong                    //
+//                                             //
+//     Made with Processing 3.4, 2018-2019     //
+//     Last updated: 1/18/2019                 //
+//                                             //
+/////////////////////////////////////////////////
 
 //-----Setup-----
 // Application variables
 float aspect_ratio = (16.0/9.0);
 float window_height = 500.0;
 float window_width = aspect_ratio * window_height;
-int framerate = 30;
+int framerate = 50;
 
 // Animations/Images
 PImage background_img;
@@ -75,7 +75,7 @@ void setup() {
     "Loading..",
     "Loading..."
   };
-  int[] loading_sequences = {4};
+  int[] loading_sequences = {3};
   loading = new TextAnimation(loading_texts, loading_sequences);
   
 }
@@ -93,39 +93,30 @@ class Animation {
   }
   
   // AnimationFrame variables
-  int cycle = 1;
-  int delay = 1;
-  int i = 1;
+  int cycle = 0;
+  int delay;
+  int i = 0;
   
-  // Calculate what frame to draw
-  int calcAnimationFrame(int seq, int del) {
+  // Calculate what frame to draw when given the sequence and total time in milliseconds
+  int calcAnimationFrame(int seq, int tt) {
     
-    delay = del;
+    // Calculate delay in frames
+    delay = ceil(float(tt * framerate)/float(1000 * animate_sequences[seq - 1]));
     
-    // If the cycle is equal to or past the last image in the sequence, reset
-    if (cycle >= animate_sequences[seq - 1] - 1) {
-      if (i < delay) {
-        i += 1;
-        return cycle - 1;
-      }
-      else {
-        i = 1;
-        cycle = 1;
-        return cycle - 1;
-      }
+    // Frame change logic
+    if (i < delay) {
+      i += 1;
+      return cycle;
     }
     else {
-      // Iterate 'i' but not 'cycle' to create a 'frozen' frame
-      if (i < delay) {
-        i += 1;
-        return cycle - 1;
+      i = 0;
+      if (cycle >= animate_sequences[seq - 1] - 1) {
+        cycle = 0;
       }
-      // Iterate 'cycle' but not 'i' to cycle and reset the delay counter
       else {
-        i = 1;
         cycle += 1;
-        return cycle - 1;
       }
+      return cycle;
     }
   }
 }
@@ -276,20 +267,28 @@ void drawScene(int scene) {
     // Pink background
     color backdrop = color(245, 175, 185);
     background(backdrop);
+    fill(255);
     
     // Draw the walking player on repeat in the same spot
-    player.drawSprite(player.sprites[0][player.calcAnimationFrame(1, 5)], width/2, height/2 - int(window_height/18.0), int(window_height/2.5), int(window_height/2.5));
+    player.drawSprite(player.sprites[0][player.calcAnimationFrame(1, 1600)], width/2, height/2 - int(window_height/18.0), int(window_height/2.5), int(window_height/2.5));
     
     // Display a loading message
     textFont(display, int(window_height/9.0));
     textAlign(CENTER);
-    loading.drawText(loading.texts[loading.calcAnimationFrame(1, 20)], width/2, height/2 + int(window_height/4.5));
+    loading.drawText(loading.texts[loading.calcAnimationFrame(1, 2400)], width/2, height/2 + int(window_height/4.5));
   
   } 
   
   // Main screen/Start screen
   else if (scene == SCENE_MAIN) {
+    // Image Background
+    image(adjustResolution(background_img, aspect_ratio, "center"), width/2, height/2, width, height);
+    fill(255);
     
+    // Display Game Name
+    textFont(text, int(window_height/4.0));
+    textAlign(CENTER);
+    text("Eternity", width/2, window_height/5.0);
   }
   
   // Game
@@ -313,7 +312,7 @@ void drawScene(int scene) {
 void draw() {
   
   frameRate(framerate); // Set framerate
-  drawScene(SCENE_LOADING);
-  //drawScene(SCENE_MAIN);
+  //drawScene(SCENE_LOADING);
+  drawScene(SCENE_MAIN);
 
 }
