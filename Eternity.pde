@@ -196,7 +196,26 @@ class TextAnimation extends Animation {
 }
 
 // Player class
-class Crane {
+class Player extends Sprite {
+  
+  int x = 0, 
+      y = 0;
+  char u = UP, 
+       d = DOWN;
+  
+  // Crane constructor
+  Player(PImage[] sss, int[][] sssplit, int[] a) {
+    super(sss, sssplit, a);
+  }
+  
+  void move() {
+    if (are_down.hasValue(u)) {
+      y -= (1);
+    }
+    if (are_down.hasValue(d)) {
+      y += (1);
+    }
+  }
 
 }
 
