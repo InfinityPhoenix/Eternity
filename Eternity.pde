@@ -28,6 +28,7 @@ int framerate = 50;
 PImage background_img;
 Sprite player;
 TextAnimation loading;
+EllButton test;
 
 // Set scene names
 int SCENE_LOADING = 1,
@@ -77,6 +78,8 @@ void setup() {
   };
   int[] loading_sequences = {3};
   loading = new TextAnimation(loading_texts, loading_sequences);
+  
+  test = new EllButton(width/2, 3 * height/4, height/4, height/4, "monkaS");
   
 }
 
@@ -308,6 +311,13 @@ void drawScene(int scene) {
     textFont(text, int(window_height/4.0));
     textAlign(CENTER);
     text("Eternity", width/2, window_height/5.0);
+    
+    test.draw();
+    if (test.clicked()) {
+      fill(int(random(0, 255)), int(random(0, 255)), int(random(0, 255)));
+      text(test.t, mouseX, mouseY);
+    }
+    
   }
   
   // Game

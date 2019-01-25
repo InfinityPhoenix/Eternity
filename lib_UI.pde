@@ -11,11 +11,24 @@ class Button {
     t = text;
   }
   
+}
+
+class EllButton extends Button {
+  
+  EllButton(int x_pos, int y_pos, int b_width, int b_height, String text) {
+    super(x_pos, y_pos, b_width, b_height, text);
+  }
+  
   boolean clicked() {
-    if (mousePressed && mouseX >= x && mouseX <= x + w  && mouseY >= y && mouseY <= y + h) {
+    int c = int((w/h) * sqrt(pow(h/2, 2) - pow(mouseY - y, 2)));
+    if (mousePressed && mouseX >= x - c && mouseX <= x + c) {
       return true;
     }
     return false;
+  }
+  
+  void draw() {
+    ellipse(x, y, w, h);
   }
   
 }
