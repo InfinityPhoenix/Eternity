@@ -25,10 +25,11 @@ float window_width = aspect_ratio * window_height;
 int framerate = 50;
 
 // Animations/Images
-PImage background_img;
-Sprite player;
 TextAnimation loading;
 EllButton test;
+PImage background_img;
+PImage settings;
+Sprite player;
 
 // Set scene names
 int SCENE_LOADING = 1,
@@ -58,6 +59,9 @@ void setup() {
   // Background
   String imagepath = "graphics/environment/";
   background_img = loadImage(imagepath + "Background_Largest.png");
+  // Settings
+  imagepath = "graphics/menus/";
+  settings = loadImage(imagepath + "settings.png");
   
   // Player (Crane)
   imagepath = "graphics/sprites/player/";
@@ -308,10 +312,18 @@ void drawScene(int scene) {
     fill(255);
     
     // Display Game Name
-    textFont(text, int(window_height/4.0));
+    textFont(text, int(height/4));
     textAlign(CENTER);
-    text("Eternity", width/2, window_height/5.0);
+    text("Eternity", width/2, height/5);
     
+    imageMode(CENTER);
+    image(settings, width - (height/8), height/8, height/8, height/8);
+    
+    noStroke();
+    fill(255, 218, 249);
+    if (test.hovered()) {
+      fill(235, 255, 245);
+    }
     test.draw();
     if (test.clicked()) {
       fill(int(random(0, 255)), int(random(0, 255)), int(random(0, 255)));

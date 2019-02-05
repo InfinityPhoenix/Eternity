@@ -19,6 +19,14 @@ class EllButton extends Button {
     super(x_pos, y_pos, b_width, b_height, text);
   }
   
+  boolean hovered() {
+    int c = int((w/h) * sqrt(pow(h/2, 2) - pow(mouseY - y, 2)));
+    if (mouseX >= x - c && mouseX <= x + c) {
+      return true;
+    }
+    return false;
+  }
+  
   boolean clicked() {
     int c = int((w/h) * sqrt(pow(h/2, 2) - pow(mouseY - y, 2)));
     if (mousePressed && mouseX >= x - c && mouseX <= x + c) {
